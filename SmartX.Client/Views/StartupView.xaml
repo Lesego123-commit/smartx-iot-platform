@@ -1,0 +1,82 @@
+<!--
+  PROG7312 - Programming 3B | Part 1: Smart-X Data Ingestion & Validation Gateway
+  File:    SmartX.Client/Views/StartupView.xaml
+  Purpose: Landing view presenting the three architectural pillars.
+  
+  References (Harvard) - sources consulted for the techniques used in this file:
+    - Microsoft, 2024. Windows Presentation Foundation (WPF) documentation. Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/ [Accessed 10 September 2026].
+    - Microsoft, 2024. Styles and templates (WPF). Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/styles-templates-overview [Accessed 10 September 2026].
+-->
+<UserControl x:Class="SmartX.Client.Views.StartupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="40,36,40,40" MaxWidth="1100" HorizontalAlignment="Left">
+
+            <TextBlock Text="SMART-X OPERATIONAL INTELLIGENCE" Style="{StaticResource Muted}"
+                       FontFamily="Segoe UI Semibold" Foreground="{StaticResource AccentBrush}" />
+            <TextBlock Text="Operational Intelligence Suite" Style="{StaticResource H1}" Margin="0,6,0,0" />
+            <TextBlock Style="{StaticResource Muted}" Margin="0,10,0,0" TextWrapping="Wrap" MaxWidth="760"
+                       Text="The Smart-X mesh streams multi-typed telemetry from thousands of ESP32 microcontrollers — floats for soil moisture, integers for power wattage, booleans for valve states — into a central .NET gateway. All three pillars are now live: choose one to begin." />
+
+            <TextBlock Text="ARCHITECTURAL PILLARS" Style="{StaticResource Muted}" Margin="2,34,0,12"
+                       FontFamily="Segoe UI Semibold" />
+
+            <UniformGrid Columns="3">
+                <!-- Pillar 1: enabled -->
+                <Border Style="{StaticResource Card}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <Border Width="46" Height="46" CornerRadius="10" Background="#2622D3EE" HorizontalAlignment="Left">
+                            <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Sensor Data Ingestion &amp; Telemetry" Style="{StaticResource H2}" Margin="0,14,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" TextWrapping="Wrap" MinHeight="72"
+                                   Text="Register devices, push typed telemetry through the API, attach config/log files, and watch the live anomaly heat-strip surface spikes and disconnects."/>
+                        <Border Background="#2634D399" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left" Margin="0,4,0,12">
+                            <TextBlock Text="ACTIVE" FontSize="11" FontFamily="Segoe UI Semibold" Foreground="{StaticResource GoodBrush}"/>
+                        </Border>
+                        <Button x:Name="OpenIngestionButton" Content="Open module  &#x2192;" Style="{StaticResource Accent}"
+                                HorizontalAlignment="Left" Click="OpenIngestion_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Pillar 2: active (Part 2) -->
+                <Border Style="{StaticResource Card}" Margin="5,0,5,0">
+                    <StackPanel>
+                        <Border Width="46" Height="46" CornerRadius="10" Background="#2622D3EE" HorizontalAlignment="Left">
+                            <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Real-Time Command Stream &amp; History" Style="{StaticResource H2}" Margin="0,14,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" TextWrapping="Wrap" MinHeight="72"
+                                   Text="Live command dispatch, override controls and searchable history over volatile queues, built on advanced data structures."/>
+                        <Border Background="#2634D399" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left" Margin="0,4,0,12">
+                            <TextBlock Text="ACTIVE" FontSize="11" FontFamily="Segoe UI Semibold" Foreground="{StaticResource GoodBrush}"/>
+                        </Border>
+                        <Button Content="Open module  &#x2192;" Style="{StaticResource Accent}" HorizontalAlignment="Left"
+                                Click="OpenCommandStream_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Pillar 3: active (Final PoE) -->
+                <Border Style="{StaticResource Card}" Margin="10,0,0,0">
+                    <StackPanel>
+                        <Border Width="46" Height="46" CornerRadius="10" Background="#2622D3EE" HorizontalAlignment="Left">
+                            <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Network Topology &amp; Mesh Routing" Style="{StaticResource H2}" Margin="0,14,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" TextWrapping="Wrap" MinHeight="72"
+                                   Text="Visualise the mesh graph, trace power-efficient MST routes to the gateway, run BFS/DFS, and query historical telemetry from a balanced tree."/>
+                        <Border Background="#2634D399" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left" Margin="0,4,0,12">
+                            <TextBlock Text="ACTIVE" FontSize="11" FontFamily="Segoe UI Semibold" Foreground="{StaticResource GoodBrush}"/>
+                        </Border>
+                        <Button Content="Open module  &#x2192;" Style="{StaticResource Accent}" HorizontalAlignment="Left"
+                                Click="OpenTopology_Click"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

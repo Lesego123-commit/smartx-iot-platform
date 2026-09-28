@@ -1,0 +1,113 @@
+<!--
+  PROG7312 - Programming 3B | Part 1: Smart-X Data Ingestion & Validation Gateway
+  File:    SmartX.Client/MainWindow.xaml
+  Purpose: Shell window: navigation rail and content host for the three pillars.
+  
+  References (Harvard) - sources consulted for the techniques used in this file:
+    - Microsoft, 2024. Windows Presentation Foundation (WPF) documentation. Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/ [Accessed 10 September 2026].
+    - Microsoft, 2024. Styles and templates (WPF). Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/styles-templates-overview [Accessed 10 September 2026].
+    - Microsoft, 2024. Control templates (WPF). Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/control-templates [Accessed 10 September 2026].
+-->
+<Window x:Class="SmartX.Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SmartX.Client"
+        Title="Smart-X Gateway · Operational Intelligence" Height="760" Width="1240"
+        MinHeight="560" MinWidth="940" WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        Background="{StaticResource BgBrush}">
+
+    <Window.Resources>
+        <Style x:Key="Nav" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8"
+                                Padding="{TemplateBinding Padding}" Margin="0,2">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="#14FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="234"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left nav rail -->
+        <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="16,20,16,18">
+                <StackPanel DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource AccentBrush}">
+                            <TextBlock Text="SX" Foreground="#07131A" FontFamily="Segoe UI Black" FontSize="14"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="SMART-X" FontFamily="Segoe UI Black" FontSize="15"/>
+                            <TextBlock Text="Operational Intelligence" Style="{StaticResource Muted}" FontSize="10.5"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Rectangle Height="1" Fill="{StaticResource BorderBrush}" Margin="0,18,0,14"/>
+                    <TextBlock Text="GATEWAY" Style="{StaticResource Muted}" FontSize="10.5" Margin="6,0,0,6" FontFamily="Segoe UI Semibold"/>
+
+                    <Button Style="{StaticResource Nav}" Click="Home_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,12,0"/>
+                            <TextBlock Text="Home"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Nav}" Click="Ingestion_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,12,0"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                            <TextBlock Text="Sensor Data Ingestion"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Nav}" Click="CommandStream_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,12,0"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                            <TextBlock Text="Real-Time Command Stream"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Nav}" Click="Topology_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,12,0"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                            <TextBlock Text="Network Topology &amp; Mesh"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+                    <Rectangle Height="1" Fill="{StaticResource BorderBrush}" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="ApiFooter" Style="{StaticResource Muted}" FontSize="10.5" TextWrapping="Wrap"
+                               Text="API: http://localhost:5101"/>
+                    <TextBlock Text="PROG7312 · Final PoE · v3.0" Style="{StaticResource Muted}" FontSize="10.5" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Content host -->
+        <ContentControl x:Name="Host" Grid.Column="1"/>
+    </Grid>
+</Window>
