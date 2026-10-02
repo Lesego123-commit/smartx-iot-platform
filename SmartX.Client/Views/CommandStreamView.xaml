@@ -1,0 +1,292 @@
+<!--
+  PROG7312 - Programming 3B | Part 2: Smart-X Real-Time Processing & Device Management
+  File:    SmartX.Client/Views/CommandStreamView.xaml
+  Purpose: Real-Time Command Stream page - queue status, device search/filter with manual
+           override commands, timeline chart, predictive Suggested Actions and the undo stack.
+
+  References (Harvard) - sources consulted for the techniques used in this file:
+    - Microsoft, 2024. Styles and templates (WPF). Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/styles-templates-overview [Accessed 25 September 2026].
+    - Microsoft, 2024. Data templating overview (WPF). Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/data-templating-overview [Accessed 25 September 2026].
+    - Microsoft, 2024. ItemsControl Class. Microsoft Learn. Available at: https://learn.microsoft.com/en-us/dotnet/api/system.windows.controls.itemscontrol [Accessed 25 September 2026].
+-->
+<UserControl x:Class="SmartX.Client.Views.CommandStreamView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="28,22,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock Text="Real-Time Command Stream &amp; History" Style="{StaticResource H1}"/>
+                <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0"
+                           Text="Live device control, priority processing, and predictive insights."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Border x:Name="ConnPill" Background="#2634D399" CornerRadius="14" Padding="12,6" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="ConnDot" Width="9" Height="9" Fill="{StaticResource GoodBrush}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="ConnText" Text="Connecting…" Margin="8,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <CheckBox x:Name="LiveToggle" Content="Live" Foreground="{StaticResource TextBrush}" IsChecked="True"
+                          VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <Button Content="Refresh" Style="{StaticResource Ghost}" Click="Refresh_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Queue status bar -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,16" Padding="14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock x:Name="KpiStdQueue" Text="—" Style="{StaticResource H1}" FontSize="22"/>
+                    <TextBlock Text="FIFO QUEUE" Style="{StaticResource Muted}" FontSize="10.5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock x:Name="KpiPriQueue" Text="—" Style="{StaticResource H1}" FontSize="22" Foreground="{StaticResource BadBrush}"/>
+                    <TextBlock Text="PRIORITY QUEUE" Style="{StaticResource Muted}" FontSize="10.5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock x:Name="KpiProcessed" Text="—" Style="{StaticResource H1}" FontSize="22" Foreground="{StaticResource AccentBrush}"/>
+                    <TextBlock Text="PROCESSED" Style="{StaticResource Muted}" FontSize="10.5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="3">
+                    <TextBlock x:Name="KpiErrors" Text="—" Style="{StaticResource H1}" FontSize="22" Foreground="{StaticResource WarnBrush}"/>
+                    <TextBlock Text="ACTIVE ERRORS (SET)" Style="{StaticResource Muted}" FontSize="10.5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4">
+                    <TextBlock x:Name="KpiHistory" Text="—" Style="{StaticResource H1}" FontSize="22"/>
+                    <TextBlock Text="COMMAND STACK" Style="{StaticResource Muted}" FontSize="10.5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Process next" Style="{StaticResource Ghost}" Margin="0,0,8,0" Click="ProcessNext_Click"/>
+                    <Button Content="Process all" Style="{StaticResource Accent}" Click="ProcessAll_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="360" MinWidth="320"/>
+                <ColumnDefinition Width="*" MinWidth="320"/>
+                <ColumnDefinition Width="290" MinWidth="250"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: search + device list -->
+            <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,16,0" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Devices" Style="{StaticResource H2}"/>
+                    <Grid Grid.Row="1" Margin="0,10,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                            <TextBlock Text="Category" Style="{StaticResource Muted}" FontSize="11" Margin="0,0,0,3"/>
+                            <ComboBox x:Name="CategoryFilter" SelectionChanged="Filter_Changed">
+                                <ComboBoxItem Content="All" IsSelected="True"/>
+                                <ComboBoxItem Content="Environmental"/>
+                                <ComboBoxItem Content="PowerConsumption"/>
+                                <ComboBoxItem Content="Actuator"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                            <TextBlock Text="Alert state" Style="{StaticResource Muted}" FontSize="11" Margin="0,0,0,3"/>
+                            <ComboBox x:Name="AlertFilter" SelectionChanged="Filter_Changed">
+                                <ComboBoxItem Content="All" IsSelected="True"/>
+                                <ComboBoxItem Content="Normal"/>
+                                <ComboBoxItem Content="Warning"/>
+                                <ComboBoxItem Content="Critical"/>
+                                <ComboBoxItem Content="Disconnected"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+                    <ListBox x:Name="DeviceList" Grid.Row="2" Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             SelectionChanged="DeviceList_SelectionChanged">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,0,0,8"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="bd" Background="{StaticResource PanelBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="12,10">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="9" Height="9" Fill="{Binding StateBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ShortId}" FontFamily="Consolas" FontSize="13" Margin="8,0,0,0"/>
+                                        <TextBlock Text="{Binding StateText}" Foreground="{Binding StateBrush}" FontSize="10"
+                                                   FontFamily="Segoe UI Semibold" Margin="8,1,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Location}" Style="{StaticResource Muted}" FontSize="11"
+                                               TextTrimming="CharacterEllipsis" Margin="0,4,0,0"/>
+                                    <TextBlock Text="{Binding Reading}" FontSize="12" Margin="0,3,0,0"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <Button Content="Pump" Style="{StaticResource Ghost}" Padding="10,5" FontSize="11"
+                                                Tag="{Binding DeviceId}" Click="Pump_Click"/>
+                                        <Button Content="Relay" Style="{StaticResource Ghost}" Padding="10,5" FontSize="11" Margin="6,0,0,0"
+                                                Tag="{Binding DeviceId}" Click="Relay_Click"/>
+                                        <TextBlock Text="{Binding PumpText}" Style="{StaticResource Muted}" FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                                        <TextBlock Text="{Binding RelayText}" Style="{StaticResource Muted}" FontSize="10" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- MIDDLE: timeline + insights -->
+            <Grid Grid.Column="1" Margin="0,0,16,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="200"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <TextBlock Text="Timeline" Style="{StaticResource H2}"/>
+                            <TextBlock x:Name="TimelineSubtitle" Text="select a device" Style="{StaticResource Muted}"
+                                       VerticalAlignment="Bottom" Margin="10,0,0,2"/>
+                        </StackPanel>
+                        <Canvas x:Name="TimelineCanvas" Grid.Row="1" Margin="0,8,0,0" ClipToBounds="True"
+                                SizeChanged="TimelineCanvas_SizeChanged"/>
+                    </Grid>
+                </Border>
+                <Border Grid.Row="1" Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="Automated Insights &amp; Suggested Actions" Style="{StaticResource H2}"/>
+                            <TextBlock Text="predictive engine" Style="{StaticResource Muted}"
+                                       VerticalAlignment="Bottom" Margin="10,0,0,2"/>
+                        </StackPanel>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="InsightList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource PanelBrush}" CornerRadius="8" Margin="0,0,0,8" Padding="12">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="4"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Background="{Binding AccentBrush}" CornerRadius="2" Margin="0,0,10,0"/>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="{Binding Title}" FontFamily="Segoe UI Semibold" FontSize="12"
+                                                               Foreground="{Binding AccentBrush}"/>
+                                                    <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="2" Content="{Binding ActionText}" Style="{StaticResource Accent}"
+                                                        Padding="12,7" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0"
+                                                        Visibility="{Binding HasAction, Converter={StaticResource BoolToVis}}"
+                                                        Tag="{Binding}" Click="ApplyInsight_Click"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- RIGHT: command history (stack) + active errors -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Command History" Style="{StaticResource H2}"/>
+                        <Button Grid.Row="1" Content="↶ Undo last command" Style="{StaticResource Ghost}"
+                                HorizontalAlignment="Left" Margin="0,10,0,10" Click="Undo_Click"/>
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="HistoryList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4" Opacity="{Binding Opacity}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="62"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding TimeText}" Style="{StaticResource Muted}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Summary}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding StatusText}" Style="{StaticResource Muted}" FontSize="10"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+                <Border Grid.Row="1" Style="{StaticResource Card}" Height="150">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Active Errors (HashSet)" Style="{StaticResource H2}" Margin="0,0,0,8"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="ErrorList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="0,3">
+                                            <Ellipse Width="8" Height="8" Fill="{StaticResource BadBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding}" FontFamily="Consolas" FontSize="12" Margin="8,0,0,0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
