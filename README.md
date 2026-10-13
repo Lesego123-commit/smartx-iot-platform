@@ -1,8 +1,21 @@
-# Smart-X — Operational Intelligence Suite (PROG7312 · Final PoE)
+# Smart-X — IoT Operational Intelligence Platform
 
-**Author:** Lesego Masike · **Student number:** ST10058999
-**Module:** PROG7312 (Programming 3B) / AAPD7112
-**Demo video (YouTube):** _add your unlisted YouTube link here_
+![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-239120?logo=csharp&logoColor=white)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Minimal%20API-512BD4)
+![WPF](https://img.shields.io/badge/WPF-Desktop%20Client-0078D6)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+
+> A full-stack **.NET 9** platform that ingests real-time IoT telemetry, drives a live operations console, and computes power-efficient mesh routing — built on an **ASP.NET Core Minimal API** backend with a **WPF** desktop client.
+
+### Highlights
+- **Real-time ingestion pipeline** — multi-typed telemetry processed through FIFO + priority queues, with validation and anomaly detection.
+- **Live command stream** — device control with an undo **stack**, O(1) device **dictionary** lookup, and a predictive action engine.
+- **Network topology & routing** — a **graph** of the mesh with **BFS/DFS**, a **minimum spanning tree** (Prim + Kruskal), and an **AVL tree** for time-range history queries.
+- **Hand-implemented data structures** — generics with no boxing, a binary heap, an AVL tree and graph algorithms, not just library calls.
+- Clean three-project solution (shared Core · API · desktop client), Dockerised API, fully documented.
+
+*Built by Lesego Masike · originally developed as a university software-engineering portfolio project (PROG7312).*
 
 A .NET 9 operational-intelligence gateway for the **Smart-X** IoT mesh ecosystem. Thousands
 of ESP32-class microcontrollers publish multi-typed telemetry — `float` for soil moisture,
